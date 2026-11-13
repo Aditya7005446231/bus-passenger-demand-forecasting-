@@ -1,0 +1,133 @@
+{
+  "cutoff_date": "2026-06-08",
+  "train_rows": 15699,
+  "test_rows": 4106,
+  "models_summary": [
+    {
+      "Model": "Hierarchical Baseline",
+      "WAPE": 15.51,
+      "MAE": 3.72,
+      "RMSE": 5.19
+    },
+    {
+      "Model": "Random Forest Regressor",
+      "WAPE": 10.3,
+      "MAE": 2.47,
+      "RMSE": 3.73
+    },
+    {
+      "Model": "XGBoost Regressor (Champion)",
+      "WAPE": 10.11,
+      "MAE": 2.42,
+      "RMSE": 3.56
+    }
+  ],
+  "peak_breakdown": [
+    {
+      "Segment": "Peak Hours",
+      "Trips": 2273,
+      "Baseline WAPE (%)": 14.73,
+      "RF WAPE (%)": 9.58,
+      "XGBoost WAPE (%)": 9.59
+    },
+    {
+      "Segment": "Off-Peak Hours",
+      "Trips": 1833,
+      "Baseline WAPE (%)": 16.94,
+      "RF WAPE (%)": 11.62,
+      "XGBoost WAPE (%)": 11.07
+    }
+  ],
+  "route_breakdown": [
+    {
+      "Route": "R01",
+      "Type": "commuter",
+      "Origin - Destination": "Delhi -> Chandigarh",
+      "Trips": 578,
+      "Baseline WAPE (%)": 7.66,
+      "XGBoost WAPE (%)": 7.45,
+      "WAPE Improvement (%)": 0.21
+    },
+    {
+      "Route": "R02",
+      "Type": "tourist",
+      "Origin - Destination": "Chandigarh -> Manali",
+      "Trips": 292,
+      "Baseline WAPE (%)": 29.14,
+      "XGBoost WAPE (%)": 10.85,
+      "WAPE Improvement (%)": 18.28
+    },
+    {
+      "Route": "R03",
+      "Type": "commuter",
+      "Origin - Destination": "Delhi -> Jaipur",
+      "Trips": 581,
+      "Baseline WAPE (%)": 8.35,
+      "XGBoost WAPE (%)": 9.1,
+      "WAPE Improvement (%)": -0.76
+    },
+    {
+      "Route": "R04",
+      "Type": "overnight",
+      "Origin - Destination": "Jalandhar -> Delhi",
+      "Trips": 435,
+      "Baseline WAPE (%)": 16.12,
+      "XGBoost WAPE (%)": 11.13,
+      "WAPE Improvement (%)": 4.99
+    },
+    {
+      "Route": "R05",
+      "Type": "overnight",
+      "Origin - Destination": "Delhi -> Manali",
+      "Trips": 290,
+      "Baseline WAPE (%)": 14.11,
+      "XGBoost WAPE (%)": 11.81,
+      "WAPE Improvement (%)": 2.3
+    },
+    {
+      "Route": "R06",
+      "Type": "tourist",
+      "Origin - Destination": "Delhi -> Dehradun",
+      "Trips": 438,
+      "Baseline WAPE (%)": 25.97,
+      "XGBoost WAPE (%)": 10.47,
+      "WAPE Improvement (%)": 15.51
+    },
+    {
+      "Route": "R07",
+      "Type": "tourist",
+      "Origin - Destination": "Chandigarh -> Shimla",
+      "Trips": 437,
+      "Baseline WAPE (%)": 27.04,
+      "XGBoost WAPE (%)": 11.26,
+      "WAPE Improvement (%)": 15.78
+    },
+    {
+      "Route": "R08",
+      "Type": "overnight",
+      "Origin - Destination": "Delhi -> Amritsar",
+      "Trips": 290,
+      "Baseline WAPE (%)": 16.07,
+      "XGBoost WAPE (%)": 11.24,
+      "WAPE Improvement (%)": 4.83
+    },
+    {
+      "Route": "R09",
+      "Type": "commuter",
+      "Origin - Destination": "Ludhiana -> Chandigarh",
+      "Trips": 582,
+      "Baseline WAPE (%)": 12.29,
+      "XGBoost WAPE (%)": 10.08,
+      "WAPE Improvement (%)": 2.21
+    },
+    {
+      "Route": "R10",
+      "Type": "tourist",
+      "Origin - Destination": "Delhi -> Rishikesh",
+      "Trips": 183,
+      "Baseline WAPE (%)": 21.09,
+      "XGBoost WAPE (%)": 17.79,
+      "WAPE Improvement (%)": 3.3
+    }
+  ]
+}

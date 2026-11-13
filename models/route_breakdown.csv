@@ -1,0 +1,11 @@
+Route,Type,Origin - Destination,Trips,Baseline WAPE (%),XGBoost WAPE (%),WAPE Improvement (%)
+R01,commuter,Delhi -> Chandigarh,578,7.66,7.45,0.21
+R02,tourist,Chandigarh -> Manali,292,29.14,10.85,18.28
+R03,commuter,Delhi -> Jaipur,581,8.35,9.1,-0.76
+R04,overnight,Jalandhar -> Delhi,435,16.12,11.13,4.99
+R05,overnight,Delhi -> Manali,290,14.11,11.81,2.3
+R06,tourist,Delhi -> Dehradun,438,25.97,10.47,15.51
+R07,tourist,Chandigarh -> Shimla,437,27.04,11.26,15.78
+R08,overnight,Delhi -> Amritsar,290,16.07,11.24,4.83
+R09,commuter,Ludhiana -> Chandigarh,582,12.29,10.08,2.21
+R10,tourist,Delhi -> Rishikesh,183,21.09,17.79,3.3

@@ -1,0 +1,4 @@
+Model,WAPE,MAE,RMSE
+Hierarchical Baseline,15.51,3.72,5.19
+Random Forest Regressor,10.3,2.47,3.73
+XGBoost Regressor (Champion),10.11,2.42,3.56

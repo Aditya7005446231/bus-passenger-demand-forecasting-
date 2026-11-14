@@ -5,3 +5,4 @@ __pycache__/
 .vscode/
 *.log
 .env
+VIDEO_SCRIPT.md

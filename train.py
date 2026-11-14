@@ -22,6 +22,7 @@ import joblib
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import RandomForestRegressor
+# pyrefly: ignore[missing-import]
 from xgboost import XGBRegressor
 from model_pipeline import HierarchicalBaseline, BusDemandPipeline
 

@@ -41,7 +41,6 @@ This project delivers a complete, reproducible **Decision-Support Machine Learni
 ├── eda.ipynb                     # Exploratory Data Analysis & experiments notebook
 ├── requirements.txt              # Environment dependencies
 ├── REPORT.md                     # Comprehensive technical evaluation report
-├── VIDEO_SCRIPT.md               # 3–5 minute presentation & recording guide
 └── README.md                     # System documentation & setup guide
 ```
 

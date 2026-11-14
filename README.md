@@ -85,8 +85,9 @@ python train.py
 ### 5. Launch Interactive Decision-Support Web App
 Start the interactive Streamlit dashboard:
 ```bash
-streamlit run app.py
+python -m streamlit run app.py
 ```
+*(or: `streamlit run app.py`)*
 Open your browser at `http://localhost:8501`.
 
 ---

@@ -25,7 +25,6 @@ This project delivers a complete, reproducible **Decision-Support Machine Learni
 ```text
 ├── data/
 │   ├── bus_trips.csv             # Primary dataset (19,934 trip records)
-│   ├── ground_truth_events.csv   # Analysis-only hidden simulation events
 │   └── DATA_CARD.md              # Dataset documentation & assumptions
 ├── models/
 │   ├── bus_demand_model.joblib   # Serialized champion inference pipeline

@@ -152,6 +152,34 @@ class TestBusDemandPipeline(unittest.TestCase):
         pred2 = self.pipeline.predict(sample)[0]
         self.assertEqual(pred1, pred2, "Non-deterministic prediction detected!")
 
+    def test_07_peak_hour_demand_logic(self):
+        """Verify that peak morning rush hour yields higher ridership than off-peak afternoon."""
+        d_peak = pd.DataFrame([{
+            "trip_id": "TEST_PEAK",
+            "route_id": "R01",
+            "origin": "Delhi",
+            "destination": "Chandigarh",
+            "distance_km": 250.0,
+            "route_type": "commuter",
+            "departure_datetime": datetime(2026, 8, 17, 8, 0),
+            "weekday": 0,
+            "month": 8,
+            "season": "monsoon",
+            "is_holiday": 0,
+            "is_weekend": 0,
+            "is_peak": 1,
+            "capacity": 52,
+            "base_fare": 440.0,
+            "days_to_departure": 7,
+        }])
+        d_off = d_peak.copy()
+        d_off["departure_datetime"] = datetime(2026, 8, 17, 14, 0)
+        d_off["is_peak"] = 0
+
+        pred_peak = self.pipeline.predict(d_peak)[0]
+        pred_off = self.pipeline.predict(d_off)[0]
+        self.assertGreater(pred_peak, pred_off, "Peak hour demand should exceed off-peak demand!")
+
 
 if __name__ == "__main__":
     unittest.main(verbosity=2)

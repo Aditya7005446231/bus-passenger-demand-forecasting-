@@ -79,14 +79,20 @@ with tabs[0]:
         st.caption(f"**Distance:** {route_info['distance_km']} km | **Type:** {route_info['route_type']}")
 
     with col2:
-        dep_date = st.date_input("Departure Date:", value=date(2026, 8, 15))
+        cutoff_dt = pd.to_datetime(artifact.get("cutoff_date", "2026-06-08")).date()
+        dep_date = st.date_input(
+            "Departure Date (Forecast Horizon):",
+            value=date(2026, 8, 15),
+            min_value=cutoff_dt,
+            help=f"Operational forecast window starts from {cutoff_dt} (post-training chronological cutoff)."
+        )
         dep_time = st.time_input("Departure Time:", value=time(7, 30))
         dep_datetime = datetime.combine(dep_date, dep_time)
         hour = dep_time.hour
         is_peak = 1 if ((6 <= hour < 9) or (16 <= hour < 20)) else 0
         weekday = dep_datetime.weekday()
         weekday_name = dep_datetime.strftime("%A")
-        st.caption(f"**Day:** {weekday_name} | **Slot:** {'Peak Window 🔥' if is_peak else 'Off-Peak 🕒'}")
+        st.caption(f"**Day:** {weekday_name} | **Slot:** {'Peak Window 🔥' if is_peak else 'Off-Peak 🕒'} | **Window:** Future Held-Out (>{cutoff_dt})")
 
     with col3:
         capacity_choices = [30, 40, 45, 52]

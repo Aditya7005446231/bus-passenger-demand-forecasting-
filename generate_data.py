@@ -629,9 +629,8 @@ def main(argv: list[str] | None = None) -> None:
     out = Path(cfg["out_dir"])
     out.mkdir(parents=True, exist_ok=True)
     main_df.to_csv(out / "bus_trips.csv", index=False)
-    truth_df.to_csv(out / "ground_truth_events.csv", index=False)
     (out / "DATA_CARD.md").write_text(build_data_card(cfg), encoding="utf-8")
-    print(f"Wrote {out / 'bus_trips.csv'}, {out / 'ground_truth_events.csv'}, {out / 'DATA_CARD.md'}\n")
+    print(f"Wrote {out / 'bus_trips.csv'} and {out / 'DATA_CARD.md'}\n")
 
     validation_report(main_df, truth_df, cfg)
 

@@ -26,19 +26,31 @@ from sklearn.ensemble import RandomForestRegressor
 from xgboost import XGBRegressor
 from model_pipeline import HierarchicalBaseline, BusDemandPipeline
 
-# Metric functions
+# ==============================================================================
+# SECTION 1: EVALUATION METRICS (WAPE, MAE, RMSE)
+# ==============================================================================
 def calc_wape(y_true: np.ndarray, y_pred: np.ndarray) -> float:
-    """Weighted Absolute Percentage Error = sum|y - y_hat| / sum|y|"""
+    """
+    Weighted Absolute Percentage Error = sum|y - y_hat| / sum|y|
+    Business standard in retail & transport (avoids division by zero).
+    """
     denominator = np.sum(np.abs(y_true))
     return float(np.sum(np.abs(y_true - y_pred)) / denominator) if denominator > 0 else 0.0
 
 def calc_mae(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Mean Absolute Error (passengers)."""
     return float(np.mean(np.abs(y_true - y_pred)))
 
 def calc_rmse(y_true: np.ndarray, y_pred: np.ndarray) -> float:
+    """Root Mean Squared Error (penalizes large operational outliers)."""
     return float(np.sqrt(np.mean((y_true - y_pred) ** 2)))
 
 def evaluate_predictions(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
+    """
+    [LIVE CODING TIP]: If interviewer asks for a new metric (e.g., MAPE or R2):
+        from sklearn.metrics import r2_score
+        "R2": round(r2_score(y_true, y_pred), 3)
+    """
     return {
         "WAPE": round(calc_wape(y_true, y_pred) * 100, 2),
         "MAE": round(calc_mae(y_true, y_pred), 2),
@@ -46,18 +58,27 @@ def evaluate_predictions(y_true: np.ndarray, y_pred: np.ndarray) -> dict:
     }
 
 
+# ==============================================================================
+# SECTION 2: DATA LOADING & HYGIENE (Deduplication, Typo Removal, Imputation)
+# ==============================================================================
 def load_and_clean_data(data_path: Path) -> tuple[pd.DataFrame, dict]:
-    """Loads raw data, removes exact duplicates and human typing errors (passengers > capacity)."""
+    """
+    Loads raw trip data and fixes real-world data quality issues:
+      1. Drops 40 exact duplicate trips (DB logging retries).
+      2. Scrubs 89 human typing errors (passengers > capacity, e.g. 520 in 52-seat bus).
+      3. Imputes missing distance_km and base_fare using route lookups.
+    """
     df = pd.read_csv(data_path)
     df["departure_datetime"] = pd.to_datetime(df["departure_datetime"])
     df["date"] = df["departure_datetime"].dt.normalize()
 
-    # Drop exact trip duplicates
+    # Step 1: Drop exact trip duplicates
     clean_df = df.drop_duplicates(subset=["trip_id"]).copy()
-    # Remove typing errors (e.g. 520 passengers in a 52 seat bus)
+
+    # Step 2: Remove typing errors (e.g. clerk entered 520 passengers)
     clean_df = clean_df[clean_df["passengers"] <= clean_df["capacity"]].copy()
 
-    # Build route lookup dictionary for clean deterministic imputation
+    # Step 3: Build route lookup dictionary for clean deterministic imputation
     route_lookup = {}
     fare_per_km = {"commuter": 1.6, "tourist": 2.0, "overnight": 1.9}
     for rid, group in clean_df.groupby("route_id"):
@@ -71,7 +92,7 @@ def load_and_clean_data(data_path: Path) -> tuple[pd.DataFrame, dict]:
             "base_fare_rate": fare_per_km.get(rtype, 1.8),
         }
 
-    # Apply deterministic imputation on clean_df
+    # Step 4: Apply deterministic imputation on missing distances and fares
     clean_df["distance_km"] = clean_df.groupby("route_id")["distance_km"].transform(
         lambda s: s.fillna(s.dropna().iloc[0])
     )
@@ -82,18 +103,32 @@ def load_and_clean_data(data_path: Path) -> tuple[pd.DataFrame, dict]:
     return clean_df, route_lookup
 
 
+# ==============================================================================
+# SECTION 2: FEATURE ENGINEERING (Known strictly 7 days before departure)
+# ==============================================================================
 def prepare_ml_features(clean_df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
-    """Generates features strictly available 7 days prior to departure."""
+    """
+    Generates features strictly available 7 days prior to departure.
+    
+    [LIVE CODING / INTERVIEW TIP]:
+    If the interviewer asks to add a new feature (e.g., fare_per_km, is_rush_hour),
+    simply add the calculation here and append the column name to `base_num_cols`!
+    Example:
+        df["fare_per_km"] = df["base_fare"] / (df["distance_km"] + 1e-5)
+        base_num_cols.append("fare_per_km")
+    """
     df = clean_df.copy()
     df["hour"] = df["departure_datetime"].dt.hour
     df["day_of_year"] = df["departure_datetime"].dt.dayofyear
 
+    # Base numerical & binary features known 7 days out
     base_num_cols = [
         "distance_km", "capacity", "base_fare",
         "weekday", "month", "hour", "day_of_year",
         "is_weekend", "is_peak", "is_holiday",
     ]
 
+    # One-hot encode categorical features (route_type and season)
     encoded = pd.get_dummies(df, columns=["route_type", "season"], drop_first=False)
     dummy_cols = [c for c in encoded.columns if c.startswith(("route_type_", "season_"))]
     feature_columns = base_num_cols + dummy_cols
@@ -115,7 +150,9 @@ def run_pipeline(data_path: str, model_dir: str):
 
     encoded_df, feature_cols = prepare_ml_features(clean_df)
 
-    # Chronological 80/20 train/test split
+    # ==============================================================================
+    # SECTION 4: CHRONOLOGICAL 80/20 TRAIN/TEST SPLIT (Zero-Leakage)
+    # ==============================================================================
     unique_dates = np.sort(clean_df["date"].unique())
     cutoff_date = pd.Timestamp(unique_dates[int(0.80 * len(unique_dates))])
     print(f"Chronological Cutoff: {cutoff_date.date()} (Train: first 80%, Test: last 20%)")
@@ -132,7 +169,10 @@ def run_pipeline(data_path: str, model_dir: str):
     X_train, y_train = train_df[feature_cols], train_df["passengers"].values
     X_test, y_test = test_df[feature_cols], test_df["passengers"].values
 
-    # 1. Baseline Model
+    # ==============================================================================
+    # SECTION 5: MODEL TRAINING & BENCHMARKING (Baseline vs RF vs XGBoost)
+    # ==============================================================================
+    # 1. Baseline Model (Historical hierarchical average with tourist fallback)
     print("\n[1/3] Training Hierarchical Historical Baseline...")
     baseline = HierarchicalBaseline()
     baseline.fit(clean_df[train_mask])
@@ -147,7 +187,7 @@ def run_pipeline(data_path: str, model_dir: str):
     rf_preds = np.clip(np.round(rf_raw_preds), 0, test_df["capacity"].values).astype(int)
     rf_metrics = evaluate_predictions(y_test, rf_preds)
 
-    # 3. Candidate Model 2: XGBoost
+    # 3. Candidate Model 2: XGBoost (Champion)
     print("[3/3] Training Candidate Model 2 (XGBoost Regressor)...")
     xgb = XGBRegressor(n_estimators=150, max_depth=5, learning_rate=0.08, random_state=42, n_jobs=-1)
     xgb.fit(X_train, y_train)

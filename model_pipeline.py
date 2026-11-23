@@ -79,6 +79,10 @@ class BusDemandPipeline:
         data["weekday"] = data["departure_datetime"].dt.weekday
         data["is_weekend"] = (data["weekday"] >= 5).astype(int)
 
+        # [LIVE CODING TIP]: If you added a new custom feature in train.py
+        # (e.g., data["fare_per_km"] = data["base_fare"] / (data["distance_km"] + 1e-5)),
+        # compute it here too!
+
         # One-hot encode categoricals
         encoded = pd.get_dummies(data, columns=["route_type", "season"], drop_first=False)
         # Ensure all expected feature columns are present
